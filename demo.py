@@ -29,7 +29,7 @@ def main() -> None:
     engine = get_engine()
 
     st.title(" Aide au diagnostic — réseau de distribution d'eau potable")
-    st.caption("Prototype démonstrable — approche hybride règles + réseau bayésien")
+    st.caption("Prototype démonstrable — approche hybride règles et réseau bayésien")
 
     with st.sidebar:
         st.header("Observations")
