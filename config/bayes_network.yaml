@@ -1,0 +1,120 @@
+# =========================================================================
+# Réseau bayésien — gestion de l'incertitude
+# =========================================================================
+#
+# Hypothèse simplificatrice du cours : les causes sont mutuellement
+# exclusives en première approximation (une seule cause "vraie" à la fois).
+# On modélise donc un réseau de type "naïf" :
+#
+#     P(Cause | Observations) ∝ P(Cause) × Π_i P(Observation_i | Cause)
+#
+# - "prior" : probabilité a priori P(Cause), les taux de base restent
+#   visibles et documentés (cf. point souligné dans le cours sur les
+#   "base rates").
+# - "cpt" : table de probabilité conditionnelle P(valeur_observation | Cause).
+#   Une observation absente du dictionnaire d'une cause est considérée
+#   non informative (probabilité neutre = 1) : elle ne pénalise ni ne
+#   favorise la cause -> gère l'incomplétude sans forcer de valeur.
+# - Les CPT sont estimées à dire d'expert (techniciens) + retour terrain,
+#   comme indiqué dans le document de cadrage.
+
+causes:
+  fuite_majeure:
+    prior: 0.12
+    cpt:
+      pression: {basse: 0.90, normale: 0.08, haute: 0.02}
+      debit: {nul: 0.55, faible: 0.35, normal: 0.10}
+      turbidite: {elevee: 0.15, normale: 0.85}
+      plaintes_gout: {oui: 0.10, non: 0.90}
+      pompe_alarme: {oui: 0.05, non: 0.95}
+      tension_anormale: {oui: 0.05, non: 0.95}
+      pompe_etat: {ok: 0.90, hs: 0.10}
+
+  fuite_secondaire:
+    prior: 0.15
+    cpt:
+      pression: {basse: 0.65, normale: 0.30, haute: 0.05}
+      debit: {nul: 0.05, faible: 0.40, normal: 0.55}
+      turbidite: {elevee: 0.10, normale: 0.90}
+      plaintes_gout: {oui: 0.05, non: 0.95}
+      pompe_alarme: {oui: 0.05, non: 0.95}
+      tension_anormale: {oui: 0.05, non: 0.95}
+      pompe_etat: {ok: 0.92, hs: 0.08}
+
+  vanne_fermee:
+    prior: 0.10
+    cpt:
+      pression: {basse: 0.35, normale: 0.45, haute: 0.20}
+      debit: {nul: 0.85, faible: 0.10, normal: 0.05}
+      turbidite: {elevee: 0.05, normale: 0.95}
+      plaintes_gout: {oui: 0.02, non: 0.98}
+      pompe_alarme: {oui: 0.05, non: 0.95}
+      tension_anormale: {oui: 0.05, non: 0.95}
+      pompe_etat: {ok: 0.95, hs: 0.05}
+
+  panne_pompe_mecanique:
+    prior: 0.10
+    cpt:
+      pression: {basse: 0.60, normale: 0.30, haute: 0.10}
+      debit: {nul: 0.65, faible: 0.25, normal: 0.10}
+      turbidite: {elevee: 0.05, normale: 0.95}
+      plaintes_gout: {oui: 0.02, non: 0.98}
+      pompe_alarme: {oui: 0.90, non: 0.10}
+      tension_anormale: {oui: 0.15, non: 0.85}
+      pompe_etat: {ok: 0.05, hs: 0.95}
+
+  panne_electrique_pompe:
+    prior: 0.08
+    cpt:
+      pression: {basse: 0.55, normale: 0.35, haute: 0.10}
+      debit: {nul: 0.60, faible: 0.25, normal: 0.15}
+      turbidite: {elevee: 0.05, normale: 0.95}
+      plaintes_gout: {oui: 0.02, non: 0.98}
+      pompe_alarme: {oui: 0.92, non: 0.08}
+      tension_anormale: {oui: 0.85, non: 0.15}
+      pompe_etat: {ok: 0.05, hs: 0.95}
+
+  contamination:
+    prior: 0.10
+    cpt:
+      pression: {basse: 0.15, normale: 0.70, haute: 0.15}
+      debit: {nul: 0.05, faible: 0.15, normal: 0.80}
+      turbidite: {elevee: 0.88, normale: 0.12}
+      plaintes_gout: {oui: 0.80, non: 0.20}
+      pompe_alarme: {oui: 0.03, non: 0.97}
+      tension_anormale: {oui: 0.03, non: 0.97}
+      pompe_etat: {ok: 0.95, hs: 0.05}
+
+  capteur_defaillant:
+    prior: 0.10
+    cpt:
+      pression: {basse: 0.20, normale: 0.60, haute: 0.20}
+      debit: {nul: 0.08, faible: 0.17, normal: 0.75}
+      turbidite: {elevee: 0.55, normale: 0.45}
+      plaintes_gout: {oui: 0.10, non: 0.90}
+      pompe_alarme: {oui: 0.10, non: 0.90}
+      tension_anormale: {oui: 0.10, non: 0.90}
+      pompe_etat: {ok: 0.85, hs: 0.15}
+
+  ras:
+    prior: 0.25
+    cpt:
+      pression: {basse: 0.03, normale: 0.90, haute: 0.07}
+      debit: {nul: 0.02, faible: 0.08, normal: 0.90}
+      turbidite: {elevee: 0.03, normale: 0.97}
+      plaintes_gout: {oui: 0.02, non: 0.98}
+      pompe_alarme: {oui: 0.02, non: 0.98}
+      tension_anormale: {oui: 0.02, non: 0.98}
+      pompe_etat: {ok: 0.98, hs: 0.02}
+
+# Actions recommandées associées à chaque cause (utilisées par le module
+# d'explication pour produire une conclusion actionnable).
+actions:
+  fuite_majeure: "Déclencher une intervention terrain prioritaire (recherche de fuite majeure sur le tronçon amont)."
+  fuite_secondaire: "Planifier une inspection du réseau secondaire (recherche de fuite progressive) sous 48h."
+  vanne_fermee: "Vérifier l'état des vannes du secteur concerné et les réouvrir si fermeture accidentelle."
+  panne_pompe_mecanique: "Envoyer une équipe de maintenance mécanique pour inspecter la pompe."
+  panne_electrique_pompe: "Envoyer une équipe électrique ; couper l'alimentation avant intervention."
+  contamination: "Alerte sanitaire : suspendre la distribution du secteur et lancer une analyse d'eau immédiate."
+  capteur_defaillant: "Planifier une vérification/étalonnage du capteur ; ne pas déclencher d'intervention lourde sans confirmation."
+  ras: "Aucune action requise ; poursuivre la surveillance normale."

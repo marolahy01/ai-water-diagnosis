@@ -1,0 +1,9 @@
+{
+  "pression": "basse",
+  "debit": "nul",
+  "turbidite": "normale",
+  "plaintes_gout": "non",
+  "pompe_alarme": "non",
+  "tension_anormale": "non",
+  "pompe_etat": "ok"
+}

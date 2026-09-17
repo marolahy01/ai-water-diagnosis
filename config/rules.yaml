@@ -1,0 +1,136 @@
+# =========================================================================
+# Base de connaissances symbolique — Système d'aide au diagnostic de pannes
+# Réseau de distribution d'eau potable (zone semi-urbaine, Fianarantsoa)
+# =========================================================================
+#
+# Chaque règle est de la forme :
+#   SI (conditions sur les observations)  ALORS  (causes candidates)
+#
+# - conditions : dictionnaire fait -> valeur attendue. Une valeur peut être
+#   une liste, auquel cas la condition est satisfaite si le fait observé
+#   appartient à cette liste (OU logique sur la valeur du fait).
+# - conclusions : liste des causes ajoutées à l'ensemble des candidats si
+#   la règle se déclenche (le OU du sujet, ex. "Vannes_fermées ∨ Fuite_majeure").
+# - excludes : causes explicitement écartées si la règle se déclenche
+#   (permet au moteur de "filtrer rapidement les causes impossibles").
+# - priority : sert de mesure de spécificité (nombre de conditions) pour
+#   arbitrer les conflits entre règles ; recalculée automatiquement si absente.
+
+rules:
+  - id: R1
+    description: >
+      Pression basse + débit nul + pompe fonctionnelle => vanne fermée
+      ou fuite majeure en amont du point de mesure.
+    conditions:
+      pression: basse
+      debit: nul
+      pompe_etat: ok
+    conclusions:
+      - vanne_fermee
+      - fuite_majeure
+    excludes: []
+    # NB : on n'exclut pas explicitement les pannes de pompe ici, même si
+    # "pompe_etat: ok" le suggère fortement : c'est le rôle dédié de R6
+    # (condition unique, donc moins spécifique) de porter cette exclusion,
+    # afin qu'un conflit avec une règle plus spécifique (ex. R3) puisse
+    # être tranché correctement par le principe de spécificité.
+
+  - id: R2
+    description: >
+      Turbidité élevée + plaintes sur le goût => contamination possible
+      de l'eau distribuée.
+    conditions:
+      turbidite: elevee
+      plaintes_gout: oui
+    conclusions:
+      - contamination
+
+  - id: R3
+    description: >
+      Alarme pompe + tension anormale => panne électrique de la pompe.
+    conditions:
+      pompe_alarme: oui
+      tension_anormale: oui
+    conclusions:
+      - panne_electrique_pompe
+    excludes:
+      - vanne_fermee
+      - contamination
+
+  - id: R4
+    description: >
+      Pression basse mais débit normal => fuite secondaire (perte
+      progressive) ou capteur de pression défaillant.
+    conditions:
+      pression: basse
+      debit: normal
+    conclusions:
+      - fuite_secondaire
+      - capteur_defaillant
+    excludes:
+      - fuite_majeure
+      - vanne_fermee
+
+  - id: R5
+    description: >
+      Pompe en alarme mais tension normale => panne mécanique probable
+      de la pompe plutôt qu'électrique.
+    conditions:
+      pompe_alarme: oui
+      tension_anormale: non
+    conclusions:
+      - panne_pompe_mecanique
+    excludes:
+      - panne_electrique_pompe
+
+  - id: R6
+    description: >
+      Pompe explicitement fonctionnelle => on écarte toute panne de pompe.
+    conditions:
+      pompe_etat: ok
+    conclusions: []
+    excludes:
+      - panne_pompe_mecanique
+      - panne_electrique_pompe
+
+  - id: R7
+    description: >
+      Pression et débit normaux, pas de plainte, pas de turbidité,
+      pompe OK => rien à signaler (RAS).
+    conditions:
+      pression: normale
+      debit: normal
+      turbidite: normale
+      plaintes_gout: non
+    conclusions:
+      - ras
+    excludes:
+      - fuite_majeure
+      - fuite_secondaire
+      - vanne_fermee
+      - contamination
+      - panne_pompe_mecanique
+      - panne_electrique_pompe
+
+  - id: R8
+    description: >
+      Débit nul mais pression normale/haute => probable vanne fermée
+      en aval plutôt qu'une fuite (la pression amont est préservée).
+    conditions:
+      debit: nul
+      pression: [normale, haute]
+    conclusions:
+      - vanne_fermee
+    excludes:
+      - fuite_majeure
+
+  - id: R9
+    description: >
+      Turbidité élevée sans plainte usager => possible capteur défaillant
+      (mesure isolée non corroborée) plutôt qu'une contamination avérée.
+    conditions:
+      turbidite: elevee
+      plaintes_gout: non
+    conclusions:
+      - capteur_defaillant
+      - contamination

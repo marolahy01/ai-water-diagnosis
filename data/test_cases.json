@@ -1,0 +1,181 @@
+[
+  {
+    "id": "cas_01",
+    "type": "standard",
+    "description": "Fuite majeure typique : pression basse, débit nul, pompe OK.",
+    "observation": {
+      "pression": "basse",
+      "debit": "nul",
+      "turbidite": "normale",
+      "plaintes_gout": "non",
+      "pompe_alarme": "non",
+      "tension_anormale": "non",
+      "pompe_etat": "ok"
+    },
+    "diagnostic_attendu": "fuite_majeure"
+  },
+  {
+    "id": "cas_02",
+    "type": "standard",
+    "description": "Vanne fermée : débit nul mais pression normale en amont.",
+    "observation": {
+      "pression": "normale",
+      "debit": "nul",
+      "turbidite": "normale",
+      "plaintes_gout": "non",
+      "pompe_alarme": "non",
+      "tension_anormale": "non",
+      "pompe_etat": "ok"
+    },
+    "diagnostic_attendu": "vanne_fermee"
+  },
+  {
+    "id": "cas_03",
+    "type": "standard",
+    "description": "Contamination : turbidité élevée et plaintes sur le goût.",
+    "observation": {
+      "pression": "normale",
+      "debit": "normal",
+      "turbidite": "elevee",
+      "plaintes_gout": "oui",
+      "pompe_alarme": "non",
+      "tension_anormale": "non",
+      "pompe_etat": "ok"
+    },
+    "diagnostic_attendu": "contamination"
+  },
+  {
+    "id": "cas_04",
+    "type": "standard",
+    "description": "Panne électrique de pompe : alarme pompe + tension anormale.",
+    "observation": {
+      "pression": "basse",
+      "debit": "nul",
+      "turbidite": "normale",
+      "plaintes_gout": "non",
+      "pompe_alarme": "oui",
+      "tension_anormale": "oui",
+      "pompe_etat": "hs"
+    },
+    "diagnostic_attendu": "panne_electrique_pompe"
+  },
+  {
+    "id": "cas_05",
+    "type": "standard",
+    "description": "Panne mécanique de pompe : alarme pompe, tension normale.",
+    "observation": {
+      "pression": "basse",
+      "debit": "faible",
+      "turbidite": "normale",
+      "plaintes_gout": "non",
+      "pompe_alarme": "oui",
+      "tension_anormale": "non",
+      "pompe_etat": "hs"
+    },
+    "diagnostic_attendu": "panne_pompe_mecanique"
+  },
+  {
+    "id": "cas_06",
+    "type": "standard",
+    "description": "Fuite secondaire : pression basse mais débit normal.",
+    "observation": {
+      "pression": "basse",
+      "debit": "normal",
+      "turbidite": "normale",
+      "plaintes_gout": "non",
+      "pompe_alarme": "non",
+      "tension_anormale": "non",
+      "pompe_etat": "ok"
+    },
+    "diagnostic_attendu": "fuite_secondaire"
+  },
+  {
+    "id": "cas_07",
+    "type": "standard",
+    "description": "Réseau nominal : rien à signaler.",
+    "observation": {
+      "pression": "normale",
+      "debit": "normal",
+      "turbidite": "normale",
+      "plaintes_gout": "non",
+      "pompe_alarme": "non",
+      "tension_anormale": "non",
+      "pompe_etat": "ok"
+    },
+    "diagnostic_attendu": "ras"
+  },
+  {
+    "id": "cas_08",
+    "type": "standard",
+    "description": "Capteur défaillant : turbidité élevée isolée, sans plainte usager.",
+    "observation": {
+      "pression": "normale",
+      "debit": "normal",
+      "turbidite": "elevee",
+      "plaintes_gout": "non",
+      "pompe_alarme": "non",
+      "tension_anormale": "non",
+      "pompe_etat": "ok"
+    },
+    "diagnostic_attendu": "capteur_defaillant"
+  },
+  {
+    "id": "cas_09",
+    "type": "standard",
+    "description": "Fuite majeure la nuit (contexte météo pluvieux, sans incidence directe).",
+    "observation": {
+      "pression": "basse",
+      "debit": "nul",
+      "turbidite": "normale",
+      "plaintes_gout": "non",
+      "pompe_alarme": "non",
+      "tension_anormale": "non",
+      "pompe_etat": "ok",
+      "heure": "02:00",
+      "meteo": "pluie"
+    },
+    "diagnostic_attendu": "fuite_majeure"
+  },
+  {
+    "id": "cas_10",
+    "type": "limite",
+    "description": "Observations très incomplètes : seule la pression basse est connue.",
+    "observation": {
+      "pression": "basse"
+    },
+    "diagnostic_attendu": "fuite_majeure",
+    "commentaire": "Cas limite : peu d'information, le système doit rester prudent (confiance faible/moyenne) sans planter."
+  },
+  {
+    "id": "cas_11",
+    "type": "limite",
+    "description": "Symptômes contradictoires : alarme pompe ET pompe déclarée OK par l'opérateur.",
+    "observation": {
+      "pression": "basse",
+      "debit": "nul",
+      "turbidite": "normale",
+      "plaintes_gout": "non",
+      "pompe_alarme": "oui",
+      "tension_anormale": "oui",
+      "pompe_etat": "ok"
+    },
+    "diagnostic_attendu": "panne_electrique_pompe",
+    "commentaire": "Cas limite : R3 (alarme+tension) et R6 (pompe OK) sont en conflit direct ; la spécificité doit trancher en faveur de la règle la plus précise (R3, 2 conditions vs R6, 1 condition)."
+  },
+  {
+    "id": "cas_12",
+    "type": "limite",
+    "description": "Cause rare avec symptômes ambigus : turbidité élevée + pression basse + débit faible, sans plainte ni alarme.",
+    "observation": {
+      "pression": "basse",
+      "debit": "faible",
+      "turbidite": "elevee",
+      "plaintes_gout": "non",
+      "pompe_alarme": "non",
+      "tension_anormale": "non",
+      "pompe_etat": "ok"
+    },
+    "diagnostic_attendu": "capteur_defaillant",
+    "commentaire": "Cas limite / rare : mélange de signaux de fuite et de signaux de capteur ; l'échec occasionnel de la configuration hybride sur ce type de cas est documenté dans l'analyse d'erreurs (section 5)."
+  }
+]
